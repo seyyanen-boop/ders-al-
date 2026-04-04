@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <title>11. Sınıf Bilgi Botu</title>
+    <style>
+        body { font-family: sans-serif; display: flex; justify-content: center; padding: 50px; background: #f0f2f5; }
+        .chat-card { background: white; padding: 20px; border-radius: 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); width: 400px; }
+        input { width: 80%; padding: 10px; border: 1px solid #ddd; border-radius: 5px; }
+        button { padding: 10px; cursor: pointer; background: #007bff; color: white; border: none; border-radius: 5px; }
+        #ai-response { margin-top: 20px; font-weight: bold; color: #333; }
+    </style>
+</head>
+<body>
+
+<div class="chat-card">
+    <h3>Yapay Zeka (11. Sınıf)</h3>
+    <p>Bir kavram yaz (Örn: Vektör, Tuzlu Su, Nöron):</p>
+    <input type="text" id="userInput" placeholder="Kavramı buraya yaz...">
+    <button onclick="soruSor()">Gönder</button>
+    <div id="ai-response"></div>
+</div>
+
+<script>
+    const veriTabani = {
+        "vektör": "İki vektör arasındaki açı küçülürse bileşke büyür mü, küçülür mü?",
+        "tuzlu su": "Kaynama noktası yükselirken donma noktası nasıl değişir?",
+        "nöron": "Miyelin kılıf iletim hızını artırır mı, yoksa impuls şiddetini mi?",
+        "trigonometri": "2. bölgede sinüsün işareti artı mı yoksa eksi midir?",
+        "ideal gaz": "Sıcaklık artarsa taneciklerin ortalama kinetik enerjisi artar mı?",
+        "sürtünme": "Hareket halindeki bir cisme etki eden sürtünme statik mi yoksa kinetik midir?"
+    };
+
+    function soruSor() {
+        const input = document.getElementById("userInput").value.toLowerCase();
+        const responseDiv = document.getElementById("ai-response");
+        
+        // Anahtar kelimeyi veri tabanında ara
+        let bulundu = false;
+        for (let anahtar in veriTabani) {
+            if (input.includes(anahtar)) {
+                responseDiv.innerHTML = "AI: " + veriTabani[anahtar];
+                bulundu = true;
+                break;
+            }
+        }
+
+        if (!bulundu) {
+            responseDiv.innerHTML = "AI: Bu kavramı henüz öğrenemedim, lütfen 11. sınıf fiziği, kimyası veya biyolojisinden bir şey dene!";
+        }
+    }
+</script>
+
+</body>
+</html>
