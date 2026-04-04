@@ -2,7 +2,7 @@
 <html lang="tr">
 <head>
     <meta charset="UTF-8">
-    <title>11. Sınıf Yapay Zeka Botu</title>
+    <title>11. Sınıf Yapay Zeka Soru Botu</title>
     <style>
         body { font-family: 'Segoe UI', sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; background-color: #f4f7f6; }
         .container { background: white; padding: 30px; border-radius: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); width: 450px; text-align: center; }
@@ -17,15 +17,15 @@
 
 <div class="container">
     <h2>🧠 11. Sınıf Soru Robotu</h2>
-    <p>Bir konu yaz (Örn: Tork, Modern Atom Teorisi, Gazlar...)</p>
+    <p>Bir konu yaz (Örn: Tork, Gazlar, Modern Atom...)</p>
     <input type="text" id="userInput" placeholder="Kavramı buraya yazın...">
     <button onclick="soruSor()" id="sendBtn">Yapay Zekaya Sor</button>
-    <div id="response">Burada yapay zekanın sorusu görünecek...</div>
+    <div id="response">Yapay zeka hazır, senden bir kelime bekliyor...</div>
 </div>
 
 <script>
-    // ÖNEMLİ: API anahtarını tırnakların içine yapıştır!
-    const API_KEY = "AIzaSyBKYT5w6VdZu7zqgc-S-5xZDDY5oloayyk".trim(); 
+    // DİKKAT: Anahtarını tırnakların içine yapıştır!
+    const API_KEY = "BURAYA_ALDIĞIN_ANAHTARI_YAPIŞTIR".trim(); 
 
     async function soruSor() {
         const input = document.getElementById("userInput").value;
@@ -37,41 +37,36 @@
             return;
         }
 
-        responseDiv.innerText = "Yapay zeka düşünüyor ve 11. sınıf müfredatını tarıyor...";
+        responseDiv.innerText = "Yapay zeka bağlanıyor...";
         btn.disabled = true;
 
         try {
-            // URL yapısı çok hassastır, buraya dokunma:
-            const url = `https://generativelanguage.googleapis.com/v1/models/gemini-pro:generateContent?key=${API_KEY}`;
+            // En güncel ve genel çalışan URL formatı:
+            const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${API_KEY}`;
             
             const response = await fetch(url, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
                     contents: [{
-                        parts: [{ text: `Sen 11. sınıf öğrencilerine yardımcı olan bir öğretmensin. Kullanıcı sana bir kavram gönderecek. Sen bu kavramla ilgili 11. sınıf seviyesinde, öğrenciyi düşündürecek kısa ve öz bir soru sor. Soru tek bir cümle olsun. Kavram: ${input}` }]
+                        parts: [{ text: `Sen 11. sınıf öğretmenisin. Kullanıcı bir kavram gönderecek. Sen bu kavramla ilgili 11. sınıf seviyesinde, öğrenciyi düşündürecek kısa ve öz bir soru sor. Soru tek bir cümle olsun. Kavram: ${input}` }]
                     }]
                 })
             });
 
             const data = await response.json();
 
-            // Hata Kontrolü
             if (data.error) {
-                if (data.error.status === "INVALID_ARGUMENT") {
-                    responseDiv.innerText = "Hata: API Anahtarın geçersiz görünüyor!";
-                } else {
-                    responseDiv.innerText = "Google Hatası: " + data.error.message;
-                }
-                return;
+                responseDiv.innerText = "Google Hatası: " + data.error.message;
+            } else if (data.candidates && data.candidates[0].content) {
+                const aiText = data.candidates[0].content.parts[0].text;
+                responseDiv.innerText = "🤖 AI: " + aiText;
+            } else {
+                responseDiv.innerText = "Beklenmedik bir yanıt alındı. API anahtarını kontrol et.";
             }
 
-            // Başarılı yanıtı ekrana yazdır
-            const aiText = data.candidates[0].content.parts[0].text;
-            responseDiv.innerText = "🤖 AI: " + aiText;
-
         } catch (error) {
-            responseDiv.innerText = "Bağlantı kurulamadı. İnternetini kontrol et!";
+            responseDiv.innerText = "Bağlantı hatası oluştu! İnternetini kontrol et.";
             console.error("Hata detayı:", error);
         } finally {
             btn.disabled = false;
