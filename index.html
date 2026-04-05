@@ -3,32 +3,28 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>YKS Analiz & Yönetici Paneli</title>
+    <title>YKS Analiz Paneli v4</title>
     <style>
         :root { --bg: #0f172a; --panel: #1e293b; --accent: #3b82f6; --yks: #f59e0b; --chat: #8b5cf6; --success: #10b981; --admin: #ec4899; }
         body { font-family: 'Segoe UI', sans-serif; background-color: var(--bg); color: white; margin: 0; padding: 10px; display: flex; flex-direction: column; align-items: center; }
         .container { width: 100%; max-width: 500px; display: flex; flex-direction: column; gap: 15px; padding-bottom: 80px; }
         .card { background: var(--panel); border-radius: 15px; padding: 20px; border: 1px solid #334155; box-shadow: 0 4px 15px rgba(0,0,0,0.3); text-align: center; }
         
-        /* GÖRSEL VE SORU ALANI */
+        /* SEVİYE BUTONLARI */
+        .level-select { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin: 10px 0; }
+        .level-btn { padding: 10px; border-radius: 8px; border: 1px solid #444; background: #0f172a; color: #ccc; cursor: pointer; font-size: 13px; font-weight: bold; transition: 0.3s; }
+        .level-btn.active { background: var(--yks); color: white; border-color: var(--yks); box-shadow: 0 0 10px rgba(245, 158, 11, 0.4); }
+
         #soruGorsel { width: 100%; border-radius: 10px; margin-bottom: 15px; display: none; border: 2px solid #334155; }
         #soruAlani { margin-top: 15px; text-align: left; background: #0f172a; padding: 18px; border-radius: 10px; border-left: 4px solid var(--yks); font-size: 15px; line-height: 1.7; }
         
-        /* INPUT VE BUTONLAR */
         input, textarea { width: calc(100% - 24px); padding: 12px; margin: 8px 0; border-radius: 8px; border: 1px solid #334155; background: #0f172a; color: white; outline: none; font-size: 16px; font-family: inherit; }
-        .btn { width: 100%; padding: 14px; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; transition: 0.2s; }
+        .btn { width: 100%; padding: 14px; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; }
         .btn-yks { background: var(--yks); color: white; }
         .btn-admin { background: var(--admin); color: white; margin-top: 10px; }
         
-        /* YÖNETİCİYE ÖNERİ FORMU */
         .admin-section { border: 2px dashed var(--admin); }
 
-        /* SOHBET TASARIMI */
-        .chat-box { height: 300px; border: 1px solid var(--chat); overflow: hidden; border-radius: 15px; display: flex; flex-direction: column; margin-top: 10px; padding: 0; }
-        #messageList { flex: 1; padding: 10px; overflow-y: auto; background: #0f172a; display: flex; flex-direction: column; gap: 8px; text-align: left; }
-        .msg { background: #1e293b; padding: 10px; border-radius: 8px; font-size: 14px; }
-        
-        /* AI BALONU */
         #ai-bubble { position: fixed; bottom: 20px; left: 20px; width: 60px; height: 60px; background: var(--accent); border-radius: 50%; display: flex; justify-content: center; align-items: center; cursor: pointer; z-index: 9999; font-size: 28px; }
         #ai-window { position: fixed; bottom: 90px; left: 15px; width: 90%; max-width: 320px; height: 400px; background: var(--panel); border-radius: 15px; border: 2px solid var(--accent); display: none; flex-direction: column; z-index: 9999; }
     </style>
@@ -38,36 +34,33 @@
     <div class="container">
         <div class="card">
             <h3 style="color:var(--yks); margin:0;">📝 YKS Analiz Robotu</h3>
-            <input type="text" id="konuInput" placeholder="Konu yaz (örn: Tork, Enerji)">
-            <button class="btn btn-yks" onclick="soruUret()">Soru Analiz Et</button>
+            
+            <div class="level-select">
+                <button class="level-btn" onclick="setLevel('Kolay (Öğretici)', this)">Öğretici</button>
+                <button class="level-btn active" onclick="setLevel('Orta (Pekiştirici)', this)">Pekiştirici</button>
+                <button class="level-btn" onclick="setLevel('Zor (YKS Ayarı)', this)">YKS Ayarı</button>
+                <button class="level-btn" onclick="setLevel('Yeni Nesil Boss', this)" style="color:#ef4444">🔥 Boss Level</button>
+            </div>
+
+            <input type="text" id="konuInput" placeholder="Konu yaz (örn: Tork, Mol)">
+            <button class="btn btn-yks" onclick="soruUret()">Soruyu Getir</button>
+            
             <div id="soruAlani">
                 <img id="soruGorsel" src="" alt="Soru Görseli">
                 <div id="soruMetni">Soru bekleniyor...</div>
             </div>
+            
             <button id="cevapBtn" class="btn" style="background:#475569; color:white; display:none; margin-top:10px;" onclick="cozumAc()">Çözümü Gör</button>
             <div id="cozumAlani" style="display:none; background:#064e3b; padding:15px; margin-top:10px; border-radius:10px; text-align:left;"></div>
         </div>
 
         <div class="card admin-section">
             <h3 style="color:var(--admin); margin:0;">📢 Yöneticiye Öneri</h3>
-            <p style="font-size: 12px; color: #94a3b8;">Geliştirmemizi istediğin bir şey mi var?</p>
-            
             <form action="https://formspree.io/f/mjgpplbj" method="POST">
-                <input type="text" name="name" placeholder="İsminiz (İsteğe bağlı)">
-                <textarea name="message" rows="3" placeholder="Önerinizi buraya yazın..." required></textarea>
-                <button type="submit" class="btn btn-admin">Mesajı Gönder</button>
+                <input type="text" name="name" placeholder="İsminiz">
+                <textarea name="message" rows="3" placeholder="Öneriniz..." required></textarea>
+                <button type="submit" class="btn btn-admin">Öneriyi Gönder</button>
             </form>
-        </div>
-
-        <div class="card chat-box">
-            <div style="background:var(--chat); padding:10px; font-weight:bold;">💬 Sosyal Oda</div>
-            <div id="messageList"></div>
-            <div style="padding:10px; background:#1e293b;">
-                <div style="display:flex; gap:5px;">
-                    <input type="text" id="chatInput" placeholder="Mesaj..." style="margin:0; flex:1;">
-                    <button onclick="mesajGonder()" style="background:var(--chat); border:none; color:white; padding:0 15px; border-radius:8px;">OK</button>
-                </div>
-            </div>
         </div>
     </div>
 
@@ -76,27 +69,33 @@
         <div id="aiChat" style="flex:1; padding:15px; overflow-y:auto; background:#0f172a; font-size:14px;"></div>
         <div style="padding:10px; display:flex; gap:5px; background:#1e293b;">
             <input type="text" id="aiIn" placeholder="Sor..." style="margin:0; flex:1;">
-            <button onclick="aiSor()" style="background:var(--accent); border:none; color:white; padding:0 12px; border-radius:8px;">SOR</button>
+            <button onclick="aiSor()" style="background:var(--accent); border:none; color:white; padding:0 12px; border-radius:8px;">OK</button>
         </div>
     </div>
     <div id="ai-bubble" onclick="toggleAI()">🧠</div>
 
 <script>
     const API_KEY = "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";
+    let aktifLvl = "Orta (Pekiştirici)";
     let sakliCevap = "";
+
+    function setLevel(l, b) {
+        aktifLvl = l;
+        document.querySelectorAll('.level-btn').forEach(btn => btn.classList.remove('active'));
+        b.classList.add('active');
+    }
 
     async function soruUret() {
         const konu = document.getElementById("konuInput").value || "11. Sınıf Genel";
         const metinAlan = document.getElementById("soruMetni");
         const gorsel = document.getElementById("soruGorsel");
         
-        metinAlan.innerText = "Müfredat analiz ediliyor...";
+        metinAlan.innerText = "Analiz ediliyor...";
         gorsel.style.display = "none";
         document.getElementById("cevapBtn").style.display = "none";
         document.getElementById("cozumAlani").style.display = "none";
 
-        // Konuyla ilgili görsel (Çıkmış soru mantığı için görsel desteği)
-        gorsel.src = `https://source.unsplash.com/featured/?science,physics,${konu.replace(" ","")}`;
+        gorsel.src = `https://source.unsplash.com/featured/?education,${konu.replace(" ","")}`;
         gorsel.onload = () => gorsel.style.display = "block";
 
         try {
@@ -105,16 +104,16 @@
                 headers: { "Authorization": `Bearer ${API_KEY}`, "Content-Type": "application/json" },
                 body: JSON.stringify({
                     model: "llama-3.3-70b-versatile",
-                    messages: [{ role: "user", content: `Sen bir YKS uzmanısın. ${konu} hakkında 11. sınıf müfredatına uygun, ÖSYM tarzı yeni nesil bir soru yaz. Karakter hatası yapma, düzgün Türkçe kullan. Soru bitince 'CEVAP:' yazıp çözümü ekle.` }]
+                    messages: [{ role: "user", content: `Sen uzman bir YKS öğretmenisin. ${konu} hakkında 11. sınıf müfredatına uygun, ÖSYM tarzı bir soru yaz. Zorluk: ${aktifLvl}. Karakter hatası yapma. Soru bitince 'CEVAP:' yazıp çözümü ekle.` }]
                 })
             });
             const data = await res.json();
             const fullText = data.choices[0].message.content;
             const parts = fullText.split("CEVAP:");
             metinAlan.innerText = parts[0].trim();
-            sakliCevap = parts[1] ? parts[1].trim() : "Çözüm üretilemedi.";
+            sakliCevap = parts[1] ? parts[1].trim() : "Çözüm hazır değil.";
             document.getElementById("cevapBtn").style.display = "block";
-        } catch (e) { metinAlan.innerText = "Hata oluştu!"; }
+        } catch (e) { metinAlan.innerText = "Hata! API anahtarını kontrol et."; }
     }
 
     function cozumAc() {
@@ -122,15 +121,6 @@
         cA.innerHTML = "<b>✅ Çözüm:</b><br>" + sakliCevap;
         cA.style.display = "block";
         document.getElementById("cevapBtn").style.display = "none";
-    }
-
-    // Sohbet ve AI (Karakter hataları giderildi)
-    function mesajGonder() {
-        const msg = document.getElementById("chatInput");
-        if(!msg.value) return;
-        document.getElementById("messageList").innerHTML += `<div class="msg"><b>Siz:</b> ${msg.value}</div>`;
-        msg.value = "";
-        document.getElementById("messageList").scrollTop = document.getElementById("messageList").scrollHeight;
     }
 
     function toggleAI() {
@@ -142,7 +132,7 @@
         const i = document.getElementById("aiIn");
         const c = document.getElementById("aiChat");
         if(!i.value) return;
-        c.innerHTML += `<div><b>Sen:</b> ${i.value}</div>`;
+        c.innerHTML += `<div><b>Siz:</b> ${i.value}</div>`;
         const q = i.value; i.value = "";
         try {
             const r = await fetch("https://api.groq.com/openai/v1/chat/completions", {
@@ -150,7 +140,7 @@
                 headers: { "Authorization": `Bearer ${API_KEY}`, "Content-Type": "application/json" },
                 body: JSON.stringify({
                     model: "llama-3.3-70b-versatile",
-                    messages: [{ role: "system", content: "Sadece düzgün Türkçe konuşan YKS asistanı." }, { role: "user", content: q }]
+                    messages: [{ role: "system", content: "Düzgün Türkçe konuşan YKS asistanı." }, { role: "user", content: q }]
                 })
             });
             const d = await r.json();
@@ -159,6 +149,5 @@
         } catch (e) { c.innerHTML += "<div>Hata!</div>"; }
     }
 </script>
-
 </body>
 </html>
