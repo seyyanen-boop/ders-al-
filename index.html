@@ -2,86 +2,131 @@
 <html lang="tr">
 <head>
     <meta charset="UTF-8">
-    <title>YKS Soru Robotu</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>11. Sınıf Sosyal Paneli</title>
     <style>
-        body { font-family: 'Segoe UI', sans-serif; background-color: #121212; color: white; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; }
-        .container { background: #1e1e1e; padding: 30px; border-radius: 15px; box-shadow: 0 8px 32px rgba(0,0,0,0.5); width: 450px; text-align: center; border: 1px solid #333; }
-        input { width: 85%; padding: 12px; margin: 15px 0; border-radius: 8px; border: 1px solid #444; background: #252525; color: white; outline: none; }
-        .btn-group { display: flex; flex-direction: column; gap: 10px; }
-        #soruBtn { background-color: #f68b1e; color: white; border: none; padding: 12px; border-radius: 8px; cursor: pointer; font-weight: bold; }
-        #cevapBtn { background-color: #4a4a4a; color: white; border: none; padding: 10px; border-radius: 8px; cursor: pointer; display: none; }
-        #response, #answerBox { margin-top: 20px; padding: 15px; border-radius: 8px; text-align: left; line-height: 1.5; }
-        #response { background: #2a2a2a; border-left: 4px solid #f68b1e; }
-        #answerBox { background: #1b3a1b; border-left: 4px solid #28a745; display: none; }
+        :root { --bg: #0f172a; --panel: #1e293b; --accent: #3b82f6; --yks: #f59e0b; --chat: #8b5cf6; }
+        body { font-family: 'Segoe UI', sans-serif; background-color: var(--bg); color: white; margin: 0; display: flex; flex-direction: column; align-items: center; min-height: 100vh; padding: 20px; gap: 20px; }
+        
+        .layout { display: flex; gap: 20px; width: 100%; max-width: 1000px; flex-wrap: wrap; justify-content: center; }
+
+        /* 1. VE 2. ÖZELLİK: SORU MAKİNESİ PANELİ */
+        .soru-container { background: var(--panel); border-radius: 20px; width: 450px; padding: 25px; border: 1px solid #334155; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+        .soru-container h2 { color: var(--yks); margin-top: 0; }
+        input { width: 90%; padding: 12px; border-radius: 10px; border: 1px solid #334155; background: #0f172a; color: white; margin-bottom: 10px; outline: none; }
+        .btn-yks { background: var(--yks); color: white; border: none; padding: 12px; border-radius: 10px; width: 100%; cursor: pointer; font-weight: bold; }
+        #cevapBtn { background: #10b981; color: white; border: none; padding: 10px; border-radius: 10px; width: 100%; margin-top: 10px; cursor: pointer; display: none; }
+        #soruAlani { margin-top: 20px; background: #0f172a; padding: 15px; border-radius: 10px; min-height: 150px; text-align: left; font-size: 0.9rem; }
+
+        /* 4. ÖZELLİK: ARKADAŞLARLA SOHBET (SOL ALT/YAN) */
+        .global-chat { background: var(--panel); border-radius: 20px; width: 450px; height: 400px; display: flex; flex-direction: column; border: 1px solid var(--chat); overflow: hidden; }
+        .chat-header { background: var(--chat); padding: 12px; text-align: center; font-weight: bold; }
+        .message-list { flex: 1; padding: 15px; overflow-y: auto; background: #111827; display: flex; flex-direction: column; gap: 8px; }
+        .msg-line { font-size: 0.85rem; padding: 5px 10px; border-radius: 5px; background: #1f2937; width: fit-content; }
+        .msg-line b { color: var(--chat); }
+
+        /* 3. ÖZELLİK: AI ASİSTAN (BALON SİSTEMİ) */
+        #ai-bubble { position: fixed; bottom: 20px; right: 20px; width: 60px; height: 60px; background: var(--accent); border-radius: 50%; display: flex; justify-content: center; align-items: center; cursor: pointer; box-shadow: 0 5px 20px rgba(59,130,246,0.5); }
+        #ai-window { position: fixed; bottom: 90px; right: 20px; width: 320px; height: 400px; background: var(--panel); border-radius: 15px; display: none; flex-direction: column; border: 1px solid var(--accent); box-shadow: 0 10px 30px rgba(0,0,0,0.5); z-index: 100; }
     </style>
 </head>
 <body>
 
-<div class="container">
-    <h2>📝 YKS Soru Robotu</h2>
-    <p>Konu yaz, ÖSYM tarzı soru gelsin!</p>
-    <input type="text" id="userInput" placeholder="Örn: Vektörler, Fotosentez, Gazlar...">
-    
-    <div class="btn-group">
-        <button onclick="soruSor()" id="soruBtn">Yeni Soru Oluştur</button>
-        <button onclick="cevabıGoster()" id="cevapBtn">Cevabı Gör</button>
+    <h1 style="color: white;">🚀 11. Sınıf Çalışma & Sosyal Paneli</h1>
+
+    <div class="layout">
+        <div class="soru-container">
+            <h2>📝 Soru Makinesi</h2>
+            <input type="text" id="konuInput" placeholder="Konu yaz (Vektörler, Mol vb.)">
+            <button class="btn-yks" onclick="soruUret()">YKS Sorusu Üret</button>
+            <button id="cevapBtn" onclick="alert('✅ Çözüm:\n' + sakliCevap)">Çözümü Gör</button>
+            <div id="soruAlani">Soru burada hazırlandığında görünecek...</div>
+        </div>
+
+        <div class="global-chat">
+            <div class="chat-header">👥 Arkadaşlar Arası Sohbet (Global)</div>
+            <div class="message-list" id="globalMessages">
+                <div class="msg-line"><b>Sistem:</b> Sohbet odasına hoş geldin!</div>
+            </div>
+            <div style="padding: 10px; background: var(--panel); display: flex; gap: 5px;">
+                <input type="text" id="globalInput" placeholder="Mesajın..." style="margin:0; flex:1; padding: 8px;">
+                <button onclick="sendGlobalMessage()" style="background:var(--chat); border:none; color:white; border-radius:5px; padding:0 15px; cursor:pointer">Gönder</button>
+            </div>
+        </div>
     </div>
 
-    <div id="response">Soru burada görünecek...</div>
-    <div id="answerBox"></div>
-</div>
+    <div id="ai-window">
+        <div style="background:var(--accent); padding:10px; font-weight:bold; text-align:center">🤖 11. Sınıf Asistanı</div>
+        <div id="aiBox" style="flex:1; padding:10px; overflow-y:auto; font-size:0.85rem; background:#111827"></div>
+        <div style="padding:10px; display:flex; gap:5px">
+            <input type="text" id="aiInput" style="margin:0; font-size:0.8rem">
+            <button onclick="askAI()" style="background:var(--accent); border:none; color:white; border-radius:5px">Sor</button>
+        </div>
+    </div>
+    <div id="ai-bubble" onclick="document.getElementById('ai-window').style.display = (document.getElementById('ai-window').style.display == 'flex' ? 'none' : 'flex')">
+        <span style="font-size:24px">🧠</span>
+    </div>
 
 <script>
-    // Groq sitesinden aldığın gsk_ ile başlayan kodu buraya yapıştır
+    // BURAYA ALDIĞIN GROQ ANAHTARINI YAPIŞTIR
     const API_KEY = "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"; 
-    let sonCevap = ""; // Cevabı saklamak için değişken
+    let sakliCevap = "";
 
-    async function soruSor() {
-        const input = document.getElementById("userInput").value;
-        const responseDiv = document.getElementById("response");
-        const answerBox = document.getElementById("answerBox");
-        const cevapBtn = document.getElementById("cevapBtn");
+    // 1. SORU MAKİNESİ FONKSİYONU
+    async function soruUret() {
+        const konu = document.getElementById("konuInput").value || "11. Sınıf";
+        const alan = document.getElementById("soruAlani");
+        alan.innerText = "YKS sorusu oluşturuluyor...";
         
-        if (!input) return alert("Lütfen bir konu yaz!");
-
-        responseDiv.innerText = "YKS sorusu hazırlanıyor...";
-        answerBox.style.display = "none";
-        cevapBtn.style.display = "none";
-
         try {
-            const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+            const res = await fetch("https://api.groq.com/openai/v1/chat/completions", {
                 method: "POST",
-                headers: {
-                    "Authorization": `Bearer ${API_KEY}`,
-                    "Content-Type": "application/json"
-                },
+                headers: { "Authorization": `Bearer ${API_KEY}`, "Content-Type": "application/json" },
                 body: JSON.stringify({
                     model: "llama-3.3-70b-versatile",
-                    messages: [{
-                        role: "user",
-                        content: `Sen deneyimli bir YKS öğretmenisin. Kullanıcının verdiği "${input}" konusuyla ilgili 11. sınıf müfredatına uygun, ÖSYM tarzı, çoktan seçmeli (A,B,C,D,E şıklı) bir soru hazırla. Sorunun sonunda mutlaka "CEVAP:" etiketiyle doğru şıkkı ve kısa çözümünü yaz.`
-                    }]
+                    messages: [{ role: "user", content: `${konu} konusuyla ilgili şıklı bir YKS sorusu sor. En sona CEVAP: yazıp çözümünü ekle.` }]
                 })
             });
-
-            const data = await response.json();
-            const fullText = data.choices[0].message.content;
-
-            // Soru ve cevabı ayır
-            const parts = fullText.split("CEVAP:");
-            responseDiv.innerText = parts[0].trim();
-            sonCevap = parts[1] ? parts[1].trim() : "Çözüm hazırlanamadı.";
-
-            cevapBtn.style.display = "block"; // Soruyu alınca cevap butonunu göster
-        } catch (error) {
-            responseDiv.innerText = "Bağlantı hatası! Anahtarı kontrol et.";
-        }
+            const data = await res.json();
+            const text = data.choices[0].message.content;
+            const parts = text.split("CEVAP:");
+            alan.innerText = parts[0];
+            sakliCevap = parts[1] || "Çözüm yok.";
+            document.getElementById("cevapBtn").style.display = "block";
+        } catch (e) { alert("Hata! Anahtarı kontrol et."); }
     }
 
-    function cevabıGoster() {
-        const answerBox = document.getElementById("answerBox");
-        answerBox.innerHTML = "<b>✅ Doğru Cevap & Çözüm:</b><br>" + sonCevap;
-        answerBox.style.display = "block";
+    // 2. ARKADAŞLARLA SOHBET FONKSİYONU (Simüle Edilmiş)
+    function sendGlobalMessage() {
+        const inp = document.getElementById("globalInput");
+        const list = document.getElementById("globalMessages");
+        if(!inp.value) return;
+        
+        // Bu kısım normalde bir sunucuya gider, şu an senin ekranında görünür:
+        list.innerHTML += `<div class="msg-line"><b>Sen:</b> ${inp.value}</div>`;
+        inp.value = "";
+        list.scrollTop = list.scrollHeight;
+    }
+
+    // 3. AI ASİSTAN FONKSİYONU
+    async function askAI() {
+        const inp = document.getElementById("aiInput");
+        const box = document.getElementById("aiBox");
+        const sorum = inp.value;
+        box.innerHTML += `<div><b>Sen:</b> ${sorum}</div>`;
+        inp.value = "";
+
+        const res = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+            method: "POST",
+            headers: { "Authorization": `Bearer ${API_KEY}`, "Content-Type": "application/json" },
+            body: JSON.stringify({
+                model: "llama-3.3-70b-versatile",
+                messages: [{ role: "system", content: "Samimi bir 11. sınıf yardımcısısın." }, { role: "user", content: sorum }]
+            })
+        });
+        const data = await res.json();
+        box.innerHTML += `<div style="color:#60a5fa"><b>AI:</b> ${data.choices[0].message.content}</div>`;
+        box.scrollTop = box.scrollHeight;
     }
 </script>
 
