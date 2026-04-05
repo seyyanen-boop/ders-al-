@@ -2,29 +2,28 @@
 <html lang="tr">
 <head>
     <meta charset="UTF-8">
-    <title>11. Sınıf Yapay Zeka Soru Botu</title>
+    <title>11. Sınıf Yapay Zeka Botu</title>
     <style>
-        body { font-family: 'Segoe UI', sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; background-color: #f4f7f6; }
+        body { font-family: 'Segoe UI', sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; background-color: #f0f2f5; }
         .container { background: white; padding: 30px; border-radius: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); width: 450px; text-align: center; }
         input { width: 85%; padding: 12px; margin-bottom: 15px; border: 2px solid #ddd; border-radius: 10px; outline: none; font-size: 16px; }
-        button { padding: 12px 25px; background-color: #4285f4; color: white; border: none; border-radius: 10px; cursor: pointer; font-weight: bold; width: 92%; transition: 0.3s; }
-        button:hover { background-color: #357ae8; }
+        button { padding: 12px 25px; background-color: #4285f4; color: white; border: none; border-radius: 10px; cursor: pointer; font-weight: bold; width: 92%; }
         button:disabled { background-color: #ccc; }
-        #response { margin-top: 25px; padding: 15px; background: #fffbe6; border: 1px solid #ffe58f; border-radius: 10px; min-height: 50px; color: #333; text-align: left; font-size: 15px; }
+        #response { margin-top: 25px; padding: 15px; background: #fffbe6; border: 1px solid #ffe58f; border-radius: 10px; min-height: 50px; color: #333; text-align: left; }
     </style>
 </head>
 <body>
 
 <div class="container">
     <h2>🧠 11. Sınıf Soru Robotu</h2>
-    <p>Bir konu yaz (Örn: Tork, Gazlar, Modern Atom...)</p>
-    <input type="text" id="userInput" placeholder="Kavramı buraya yazın...">
-    <button onclick="soruSor()" id="sendBtn">Yapay Zekaya Sor</button>
-    <div id="response">Yapay zeka hazır, senden bir kelime bekliyor...</div>
+    <p>Bir konu yaz (Örn: Tork, Gazlar, Vektörler...)</p>
+    <input type="text" id="userInput" placeholder="Konuyu buraya yazın...">
+    <button onclick="soruSor()" id="sendBtn">Soru Oluştur</button>
+    <div id="response">Yapay zeka hazır...</div>
 </div>
 
 <script>
-    // DİKKAT: Anahtarını tırnakların içine yapıştır!
+    // BURAYA EKRAN GÖRÜNTÜSÜNDEKİ KOPYALADIĞIN ANAHTARI YAPIŞTIR
     const API_KEY = "AIzaSyBKYT5w6VdZu7zqgc-S-5xZDDY5oloayyk".trim(); 
 
     async function soruSor() {
@@ -32,24 +31,21 @@
         const responseDiv = document.getElementById("response");
         const btn = document.getElementById("sendBtn");
 
-        if (!input) {
-            responseDiv.innerText = "Lütfen bir kelime yaz!";
-            return;
-        }
+        if (!input) return alert("Lütfen bir şey yaz!");
 
-        responseDiv.innerText = "Yapay zeka bağlanıyor...";
+        responseDiv.innerText = "Yapay zeka düşünüyor...";
         btn.disabled = true;
 
         try {
-            // En güncel ve genel çalışan URL formatı:
-           const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${API_KEY}`;
+            // Senin panelindeki en güncel model ismi budur:
+            const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${API_KEY}`;
             
             const response = await fetch(url, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
                     contents: [{
-                        parts: [{ text: `Sen 11. sınıf öğretmenisin. Kullanıcı bir kavram gönderecek. Sen bu kavramla ilgili 11. sınıf seviyesinde, öğrenciyi düşündürecek kısa ve öz bir soru sor. Soru tek bir cümle olsun. Kavram: ${input}` }]
+                        parts: [{ text: `Sen 11. sınıf öğretmenisin. "${input}" konusuyla ilgili kısa, düşündürücü bir soru sor.` }]
                     }]
                 })
             });
@@ -57,17 +53,15 @@
             const data = await response.json();
 
             if (data.error) {
-                responseDiv.innerText = "Google Hatası: " + data.error.message;
-            } else if (data.candidates && data.candidates[0].content) {
+                // Eğer hala hata verirse buradaki mesaj sorunu çözecek:
+                responseDiv.innerText = "Hata oluştu: " + data.error.message;
+            } else {
                 const aiText = data.candidates[0].content.parts[0].text;
                 responseDiv.innerText = "🤖 AI: " + aiText;
-            } else {
-                responseDiv.innerText = "Beklenmedik bir yanıt alındı. API anahtarını kontrol et.";
             }
 
         } catch (error) {
-            responseDiv.innerText = "Bağlantı hatası oluştu! İnternetini kontrol et.";
-            console.error("Hata detayı:", error);
+            responseDiv.innerText = "Bağlantı hatası!";
         } finally {
             btn.disabled = false;
         }
