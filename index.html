@@ -2,69 +2,74 @@
 <html lang="tr">
 <head>
     <meta charset="UTF-8">
-    <title>11. Sınıf Yapay Zeka Botu</title>
+    <title>Gerçek AI Soru Robotu</title>
     <style>
         body { font-family: 'Segoe UI', sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; background-color: #f0f2f5; }
         .container { background: white; padding: 30px; border-radius: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); width: 450px; text-align: center; }
         input { width: 85%; padding: 12px; margin-bottom: 15px; border: 2px solid #ddd; border-radius: 10px; outline: none; font-size: 16px; }
         button { padding: 12px 25px; background-color: #4285f4; color: white; border: none; border-radius: 10px; cursor: pointer; font-weight: bold; width: 92%; }
-        button:disabled { background-color: #ccc; }
-        #response { margin-top: 25px; padding: 15px; background: #fffbe6; border: 1px solid #ffe58f; border-radius: 10px; min-height: 50px; color: #333; text-align: left; }
+        #response { margin-top: 25px; padding: 15px; background: #f8f9fa; border-radius: 10px; min-height: 50px; color: #333; text-align: left; border-left: 5px solid #4285f4; }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <h2>🧠 11. Sınıf Soru Robotu</h2>
-    <p>Bir konu yaz (Örn: Tork, Gazlar, Vektörler...)</p>
-    <input type="text" id="userInput" placeholder="Konuyu buraya yazın...">
-    <button onclick="soruSor()" id="sendBtn">Soru Oluştur</button>
-    <div id="response">Yapay zeka hazır...</div>
+    <h2>🧠 Gerçek Yapay Zeka</h2>
+    <p>Ne istersen yaz, sana 11. sınıfa göre sorsun.</p>
+    <input type="text" id="userInput" placeholder="Herhangi bir şey yaz...">
+    <button onclick="soruSor()" id="sendBtn">AI'ya Gönder</button>
+    <div id="response">Cevap bekleniyor...</div>
 </div>
 
 <script>
-    // BURAYA EKRAN GÖRÜNTÜSÜNDEKİ KOPYALADIĞIN ANAHTARI YAPIŞTIR
-    const API_KEY = "AIzaSyBKYT5w6VdZu7zqgc-S-5xZDDY5oloayyk".trim(); 
+    const API_KEY = "AIzaSyBKYT5w6VdZu7zqgc-S-5xZDDY5oloayyk"; 
 
     async function soruSor() {
         const input = document.getElementById("userInput").value;
         const responseDiv = document.getElementById("response");
         const btn = document.getElementById("sendBtn");
 
-        if (!input) return alert("Lütfen bir şey yaz!");
-
-        responseDiv.innerText = "Yapay zeka düşünüyor...";
+        if (!input) return alert("Boş bırakma!");
+        responseDiv.innerText = "Yapay zeka derinlemesine düşünüyor...";
         btn.disabled = true;
 
-        try {
-            // Senin panelindeki en güncel model ismi budur:
-            const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${API_KEY}`;
-            
-            const response = await fetch(url, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                    contents: [{
-                        parts: [{ text: `Sen 11. sınıf öğretmenisin. "${input}" konusuyla ilgili kısa, düşündürücü bir soru sor.` }]
-                    }]
-                })
-            });
+        // Üç farklı URL kombinasyonunu sırayla deneyecek zeki yapı:
+        const urls = [
+            `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${API_KEY}`,
+            `https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key=${API_KEY}`,
+            `https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${API_KEY}`
+        ];
 
-            const data = await response.json();
+        let success = false;
 
-            if (data.error) {
-                // Eğer hala hata verirse buradaki mesaj sorunu çözecek:
-                responseDiv.innerText = "Hata oluştu: " + data.error.message;
-            } else {
-                const aiText = data.candidates[0].content.parts[0].text;
-                responseDiv.innerText = "🤖 AI: " + aiText;
+        for (let url of urls) {
+            try {
+                const response = await fetch(url, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        contents: [{
+                            parts: [{ text: `Sen 11. sınıf öğretmenisin. Kullanıcı sana bir şey yazacak. Sen bu yazdığı şeyle ilgili (ne olursa olsun) 11. sınıf seviyesinde düşündürücü, kısa bir soru soracaksın. Kullanıcı: ${input}` }]
+                        }]
+                    })
+                });
+
+                const data = await response.json();
+                
+                if (data.candidates && data.candidates[0].content) {
+                    responseDiv.innerText = "🤖 AI: " + data.candidates[0].content.parts[0].text;
+                    success = true;
+                    break; // Başarılıysa diğerlerini deneme
+                }
+            } catch (e) {
+                console.log("Bu URL çalışmadı, diğeri deneniyor...");
             }
-
-        } catch (error) {
-            responseDiv.innerText = "Bağlantı hatası!";
-        } finally {
-            btn.disabled = false;
         }
+
+        if (!success) {
+            responseDiv.innerText = "Hata: Google ile bağlantı kurulamadı. API anahtarını kopyalarken başında veya sonunda boşluk kalmadığından emin ol.";
+        }
+        btn.disabled = false;
     }
 </script>
 
