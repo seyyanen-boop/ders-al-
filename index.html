@@ -2,74 +2,64 @@
 <html lang="tr">
 <head>
     <meta charset="UTF-8">
-    <title>Gerçek AI Soru Robotu</title>
+    <title>Süper Hızlı Soru Botu</title>
     <style>
-        body { font-family: 'Segoe UI', sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; background-color: #f0f2f5; }
-        .container { background: white; padding: 30px; border-radius: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); width: 450px; text-align: center; }
-        input { width: 85%; padding: 12px; margin-bottom: 15px; border: 2px solid #ddd; border-radius: 10px; outline: none; font-size: 16px; }
-        button { padding: 12px 25px; background-color: #4285f4; color: white; border: none; border-radius: 10px; cursor: pointer; font-weight: bold; width: 92%; }
-        #response { margin-top: 25px; padding: 15px; background: #f8f9fa; border-radius: 10px; min-height: 50px; color: #333; text-align: left; border-left: 5px solid #4285f4; }
+        body { font-family: 'Segoe UI', sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; background-color: #121212; color: white; }
+        .container { background: #1e1e1e; padding: 30px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); width: 450px; text-align: center; border: 1px solid #333; }
+        input { width: 85%; padding: 12px; margin-bottom: 15px; border: 1px solid #444; border-radius: 10px; background: #252525; color: white; outline: none; }
+        button { padding: 12px 25px; background-color: #f68b1e; color: white; border: none; border-radius: 10px; cursor: pointer; font-weight: bold; width: 92%; }
+        #response { margin-top: 25px; padding: 15px; background: #2a2a2a; border-radius: 10px; min-height: 50px; text-align: left; line-height: 1.5; border-left: 4px solid #f68b1e; }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <h2>🧠 Gerçek Yapay Zeka</h2>
-    <p>Ne istersen yaz, sana 11. sınıfa göre sorsun.</p>
-    <input type="text" id="userInput" placeholder="Herhangi bir şey yaz...">
-    <button onclick="soruSor()" id="sendBtn">AI'ya Gönder</button>
+    <h2>🚀 Groq Hızlı Soru Botu</h2>
+    <p>Bir konu yaz, anında 11. sınıf sorusu gelsin.</p>
+    <input type="text" id="userInput" placeholder="Örn: Vektörler, Mol...">
+    <button onclick="soruSor()" id="sendBtn">Hızlı Sor</button>
     <div id="response">Cevap bekleniyor...</div>
 </div>
 
 <script>
-    const API_KEY = "AIzaSyBKYT5w6VdZu7zqgc-S-5xZDDY5oloayyk"; 
+    // Groq'tan aldığın gsk_ ile başlayan kodu buraya yapıştır
+    const API_KEY = "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"; 
 
     async function soruSor() {
         const input = document.getElementById("userInput").value;
         const responseDiv = document.getElementById("response");
-        const btn = document.getElementById("sendBtn");
-
+        
         if (!input) return alert("Boş bırakma!");
-        responseDiv.innerText = "Yapay zeka derinlemesine düşünüyor...";
-        btn.disabled = true;
+        responseDiv.innerText = "Yıldırım hızıyla düşünülüyor...";
 
-        // Üç farklı URL kombinasyonunu sırayla deneyecek zeki yapı:
-        const urls = [
-            `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${API_KEY}`,
-            `https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key=${API_KEY}`,
-            `https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${API_KEY}`
-        ];
+        try {
+            const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+                method: "POST",
+                headers: {
+                    "Authorization": `Bearer ${API_KEY}`,
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    model: "llama-3.3-70b-versatile", // Çok güçlü bir model
+                    messages: [{
+                        role: "user",
+                        content: `Sen bir öğretmensin. "${input}" konusuyla ilgili 11. sınıf seviyesinde düşündürücü bir soru sor.`
+                    }]
+                })
+            });
 
-        let success = false;
-
-        for (let url of urls) {
-            try {
-                const response = await fetch(url, {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({
-                        contents: [{
-                            parts: [{ text: `Sen 11. sınıf öğretmenisin. Kullanıcı sana bir şey yazacak. Sen bu yazdığı şeyle ilgili (ne olursa olsun) 11. sınıf seviyesinde düşündürücü, kısa bir soru soracaksın. Kullanıcı: ${input}` }]
-                        }]
-                    })
-                });
-
-                const data = await response.json();
-                
-                if (data.candidates && data.candidates[0].content) {
-                    responseDiv.innerText = "🤖 AI: " + data.candidates[0].content.parts[0].text;
-                    success = true;
-                    break; // Başarılıysa diğerlerini deneme
-                }
-            } catch (e) {
-                console.log("Bu URL çalışmadı, diğeri deneniyor...");
+            const data = await response.json();
+            
+            if (data.choices && data.choices[0]) {
+                responseDiv.innerText = "🤖 Soru: " + data.choices[0].message.content;
+            } else {
+                responseDiv.innerText = "Hata: Anahtarı yanlış yapıştırmış olabilirsin.";
             }
-        }
 
-        if (!success) {
-            responseDiv.innerText = "Hata: Google ile bağlantı kurulamadı. API anahtarını kopyalarken başında veya sonunda boşluk kalmadığından emin ol.";
+        } catch (error) {
+            responseDiv.innerText = "Bağlantı kurulamadı!";
+            console.error(error);
         }
-        btn.disabled = false;
     }
 </script>
 
