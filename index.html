@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>YKS Hepsi Bir Arada Panel</title>
+    <title>YKS Analiz Paneli v5</title>
     <style>
         :root { --bg: #0f172a; --panel: #1e293b; --accent: #3b82f6; --yks: #f59e0b; --chat: #8b5cf6; --success: #10b981; --admin: #ec4899; }
         body { font-family: 'Segoe UI', sans-serif; background-color: var(--bg); color: white; margin: 0; padding: 10px; display: flex; flex-direction: column; align-items: center; }
@@ -15,22 +15,22 @@
         .level-btn { padding: 10px; border-radius: 8px; border: 1px solid #444; background: #0f172a; color: #ccc; cursor: pointer; font-size: 13px; font-weight: bold; }
         .level-btn.active { background: var(--yks); color: white; border-color: var(--yks); }
 
-        /* GÖRSEL VE SORU ALANI */
+        /* SORU ALANI */
         #soruGorsel { width: 100%; border-radius: 10px; margin-bottom: 15px; display: none; border: 2px solid #334155; }
-        #soruAlani { margin-top: 15px; text-align: left; background: #0f172a; padding: 18px; border-radius: 10px; border-left: 4px solid var(--yks); font-size: 15px; line-height: 1.7; }
+        #soruAlani { margin-top: 15px; text-align: left; background: #0f172a; padding: 18px; border-radius: 10px; border-left: 4px solid var(--yks); font-size: 15px; line-height: 1.7; min-height: 40px; }
         
         input, textarea { width: calc(100% - 24px); padding: 12px; margin: 8px 0; border-radius: 8px; border: 1px solid #334155; background: #0f172a; color: white; outline: none; font-size: 16px; font-family: inherit; }
-        .btn { width: 100%; padding: 14px; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; }
+        .btn { width: 100%; padding: 14px; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 15px; }
         .btn-yks { background: var(--yks); color: white; }
         .btn-admin { background: var(--admin); color: white; margin-top: 10px; }
         
-        /* SOHBET TASARIMI */
-        .chat-box { height: 300px; border: 1px solid var(--chat); overflow: hidden; border-radius: 15px; display: flex; flex-direction: column; padding: 0; }
+        /* SOHBET ODASI */
+        .chat-box { height: 280px; border: 1px solid var(--chat); overflow: hidden; border-radius: 15px; display: flex; flex-direction: column; padding: 0; }
         #messageList { flex: 1; padding: 10px; overflow-y: auto; background: #0f172a; display: flex; flex-direction: column; gap: 8px; text-align: left; }
         .msg { background: #1e293b; padding: 10px; border-radius: 8px; font-size: 14px; border: 1px solid #334155; }
 
-        /* AI BALONU */
-        #ai-bubble { position: fixed; bottom: 20px; left: 20px; width: 60px; height: 60px; background: var(--accent); border-radius: 50%; display: flex; justify-content: center; align-items: center; cursor: pointer; z-index: 9999; font-size: 28px; }
+        /* ASİSTAN PENCERELERİ */
+        #ai-bubble { position: fixed; bottom: 20px; left: 20px; width: 60px; height: 60px; background: var(--accent); border-radius: 50%; display: flex; justify-content: center; align-items: center; cursor: pointer; z-index: 9999; font-size: 28px; box-shadow: 0 4px 15px rgba(0,0,0,0.5); }
         #ai-window { position: fixed; bottom: 90px; left: 15px; width: 90%; max-width: 320px; height: 400px; background: var(--panel); border-radius: 15px; border: 2px solid var(--accent); display: none; flex-direction: column; z-index: 9999; }
     </style>
 </head>
@@ -45,45 +45,50 @@
                 <button class="level-btn" onclick="setLevel('Zor', this)">Zor</button>
                 <button class="level-btn" onclick="setLevel('Boss Level', this)" style="color:#ef4444">🔥 Boss</button>
             </div>
-            <input type="text" id="konuInput" placeholder="Konu yaz...">
+            <input type="text" id="konuInput" placeholder="Konu yaz (örn: Devreler, Tork)...">
             <button class="btn btn-yks" onclick="soruUret()">Soru Analiz Et</button>
+            
             <div id="soruAlani">
-              <div class="card admin-section">
-    <h3 style="color:var(--admin); margin:0;">📢 Yöneticiye Öneri</h3>
-    <form id="oneriformu" action="https://formspree.io/f/mjgpplbj" method="POST">
-        <input type="text" name="name" placeholder="İsminiz">
-        <textarea name="message" rows="3" placeholder="Öneriniz doğrudan mailime gelecek..." required></textarea>
-        <button type="submit" class="btn btn-admin" id="formButon">Mesajı Gönder</button>
-    </form>
-</div>
-            <div style="padding:10px; background:#1e293b; display:flex; gap:5px;">
+                <img id="soruGorsel" src="" alt="Soru Görseli">
+                <div id="soruMetni">Soru bekleniyor...</div>
+            </div>
+            
+            <button id="cevapBtn" class="btn" style="background:#475569; color:white; display:none; margin-top:10px;" onclick="cozumAc()">Çözümü Gör</button>
+            <div id="cozumAlani" style="display:none; background:#064e3b; padding:15px; margin-top:10px; border-radius:10px; text-align:left;"></div>
+        </div>
+
+        <div class="card chat-box">
+            <div style="background:var(--chat); padding:10px; font-weight:bold;">💬 Sosyal Oda</div>
+            <div id="messageList"></div>
+            <div style="padding:10px; background:#1e293b; display:flex; gap:5px; border-top: 1px solid #334155;">
                 <input type="text" id="chatInput" placeholder="Mesaj..." style="margin:0; flex:1;">
-                <button onclick="mesajGonder()" style="background:var(--chat); border:none; color:white; padding:0 15px; border-radius:8px; cursor:pointer;">OK</button>
+                <button onclick="mesajGonder()" style="background:var(--chat); border:none; color:white; padding:0 15px; border-radius:8px; cursor:pointer; font-weight:bold;">OK</button>
             </div>
         </div>
 
         <div class="card" style="border: 2px dashed var(--admin);">
             <h3 style="color:var(--admin); margin:0;">📢 Yöneticiye Öneri</h3>
-            <form action="https://formspree.io/f/mjgpplbj" method="POST">
+            <form id="oneriformu" action="https://formspree.io/f/mjgpplbj" method="POST">
                 <input type="text" name="name" placeholder="İsminiz">
                 <textarea name="message" rows="3" placeholder="Öneriniz doğrudan mailime gelecek..." required></textarea>
-                <button type="submit" class="btn btn-admin">Mesajı Gönder</button>
+                <button type="submit" class="btn btn-admin" id="formButon">Mesajı Gönder</button>
             </form>
         </div>
     </div>
 
     <div id="ai-window">
         <div style="background:var(--accent); padding:12px; font-weight:bold; text-align:center;">🤖 Asistan</div>
-        <div id="aiChat" style="flex:1; padding:15px; overflow-y:auto; background:#0f172a; font-size:14px;"></div>
+        <div id="aiChat" style="flex:1; padding:15px; overflow-y:auto; background:#0f172a; font-size:14px; text-align:left;"></div>
         <div style="padding:10px; display:flex; gap:5px; background:#1e293b;">
             <input type="text" id="aiIn" placeholder="Sor..." style="margin:0; flex:1;">
-            <button onclick="aiSor()" style="background:var(--accent); border:none; color:white; padding:0 12px; border-radius:8px;">OK</button>
+            <button onclick="aiSor()" style="background:var(--accent); border:none; color:white; padding:0 12px; border-radius:8px; cursor:pointer; font-weight:bold;">OK</button>
         </div>
     </div>
     <div id="ai-bubble" onclick="toggleAI()">🧠</div>
 
 <script>
-    const API_KEY = "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";
+    // --- BURAYI GÜNCELLEMEYİ UNUTMA ---
+    const API_KEY = "BURAYA_GROQ_ANAHTARINI_YAPIŞTIR"; 
     let aktifLvl = "Orta";
     let sakliCevap = "";
 
@@ -93,16 +98,18 @@
         b.classList.add('active');
     }
 
+    // SORU ÜRETME FONKSİYONU
     async function soruUret() {
         const konu = document.getElementById("konuInput").value || "Genel";
         const metinAlan = document.getElementById("soruMetni");
         const gorsel = document.getElementById("soruGorsel");
-        metinAlan.innerText = "Analiz ediliyor...";
+        
+        metinAlan.innerText = "Analiz ediliyor, lütfen bekleyin...";
         gorsel.style.display = "none";
         document.getElementById("cevapBtn").style.display = "none";
         document.getElementById("cozumAlani").style.display = "none";
 
-        gorsel.src = `https://source.unsplash.com/featured/?science,${konu.replace(" ","")}`;
+        gorsel.src = `https://source.unsplash.com/featured/?physics,${konu.replace(" ","")}`;
         gorsel.onload = () => gorsel.style.display = "block";
 
         try {
@@ -110,16 +117,19 @@
                 method: "POST",
                 headers: { "Authorization": `Bearer ${API_KEY}`, "Content-Type": "application/json" },
                 body: JSON.stringify({
-                    model: "llama3-8b-8192",
-                    messages: [{ role: "user", content: `Sen YKS hocasısın. ${konu} hakkında ${aktifLvl} seviyesinde yeni nesil soru yaz. Karakter hatası yapma. 'CEVAP:' yazıp çözümü ekle.` }]
+                    model: "llama3-8b-8192", // Güncel ve stabil model
+                    messages: [{ role: "user", content: `Sen bir YKS öğretmenisin. 11. sınıf müfredatına uygun ${konu} konusu hakkında ${aktifLvl} seviyesinde yeni nesil bir soru yaz. Türkçe karakter hatası yapma. Soru metni bitince tam olarak 'CEVAP:' yazıp altına detaylı çözümü ekle.` }]
                 })
             });
             const data = await res.json();
+            if(!data.choices) { throw new Error("API Hatası"); }
             const parts = data.choices[0].message.content.split("CEVAP:");
             metinAlan.innerText = parts[0].trim();
-            sakliCevap = parts[1] ? parts[1].trim() : "Çözüm yok.";
+            sakliCevap = parts[1] ? parts[1].trim() : "Çözüm üretilemedi.";
             document.getElementById("cevapBtn").style.display = "block";
-        } catch (e) { metinAlan.innerText = "Hata!"; }
+        } catch (e) { 
+            metinAlan.innerText = "Bağlantı Hatası! Lütfen kodun en altındaki API_KEY alanına geçerli bir Groq anahtarı yapıştırdığından emin ol."; 
+        }
     }
 
     function cozumAc() {
@@ -128,6 +138,7 @@
         document.getElementById("cevapBtn").style.display = "none";
     }
 
+    // SOHBET ODASI FONKSİYONU
     function mesajGonder() {
         const inp = document.getElementById("chatInput");
         if(!inp.value) return;
@@ -141,6 +152,7 @@
         w.style.display = w.style.display === "flex" ? "none" : "flex";
     }
 
+    // ASİSTAN YAPAY ZEKASI
     async function aiSor() {
         const i = document.getElementById("aiIn");
         const c = document.getElementById("aiChat");
@@ -153,14 +165,44 @@
                 headers: { "Authorization": `Bearer ${API_KEY}`, "Content-Type": "application/json" },
                 body: JSON.stringify({
                     model: "llama3-8b-8192",
-                    messages: [{ role: "system", content: "Türkçe konuşan YKS asistanı." }, { role: "user", content: q }]
+                    messages: [{ role: "system", content: "Sen samimi bir YKS ders asistanısın. Kısa ve net Türkçe cevaplar ver." }, { role: "user", content: q }]
                 })
             });
             const d = await r.json();
-            c.innerHTML += `<div style="color:var(--accent)"><b>AI:</b> ${d.choices[0].message.content}</div>`;
+            c.innerHTML += `<div style="color:var(--accent)"><b>Asistan:</b> ${d.choices[0].message.content}</div>`;
             c.scrollTop = c.scrollHeight;
-        } catch (e) { c.innerHTML += "<div>Hata!</div>"; }
+        } catch (e) { 
+            c.innerHTML += "<div style='color:red;'>Asistan bağlantı hatası aldı. API anahtarını kontrol edin.</div>"; 
+        }
     }
+
+    // 405 BEYAZ EKRAN ENGELLEME SCRIPT'I
+    document.getElementById("oneriformu").addEventListener("submit", async function(e) {
+        e.preventDefault();
+        const form = e.target;
+        const buton = document.getElementById("formButon");
+        buton.innerText = "Gönderiliyor...";
+        buton.disabled = true;
+
+        try {
+            const response = await fetch(form.action, {
+                method: 'POST',
+                body: new FormData(form),
+                headers: { 'Accept': 'application/json' }
+            });
+            if (response.ok) {
+                alert("Harika! Önerin başarıyla bana ulaştı.");
+                form.reset();
+            } else {
+                alert("Formspree hatası. Mail aktivasyonunu yapmamış olabilirsiniz.");
+            }
+        } catch (error) {
+            alert("Bağlantı hatası!");
+        } finally {
+            buton.innerText = "Mesajı Gönder";
+            buton.disabled = false;
+        }
+    });
 </script>
 </body>
 </html>
