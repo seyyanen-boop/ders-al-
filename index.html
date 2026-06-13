@@ -112,7 +112,7 @@
                 method: "POST",
                 headers: { "Authorization": `Bearer ${API_KEY}`, "Content-Type": "application/json" },
                 body: JSON.stringify({
-                    model: "llama-3.3-70b-versatile",
+                    model: "llama3-8b-8192",
                     messages: [{ role: "user", content: `Sen YKS hocasısın. ${konu} hakkında ${aktifLvl} seviyesinde yeni nesil soru yaz. Karakter hatası yapma. 'CEVAP:' yazıp çözümü ekle.` }]
                 })
             });
