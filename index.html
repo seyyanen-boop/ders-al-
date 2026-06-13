@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>YKS Analiz Paneli v7</title>
+    <title>YKS Analiz Paneli v8</title>
     <style>
         :root { --bg: #0f172a; --panel: #1e293b; --accent: #3b82f6; --yks: #f59e0b; --chat: #8b5cf6; --success: #10b981; --admin: #ec4899; }
         body { font-family: 'Segoe UI', sans-serif; background-color: var(--bg); color: white; margin: 0; padding: 10px; display: flex; flex-direction: column; align-items: center; }
@@ -85,7 +85,7 @@
     <div id="ai-bubble" onclick="toggleAI()">🧠</div>
 
 <script>
-    // --- BURAYA %100 DOĞRU OLAN GROQ ANAHTARINI GİR ---
+    // --- BURAYA DOĞRU OLAN GROQ ANAHTARINI PASTE ET ---
     const API_KEY = "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"; 
     
     let aktifLvl = "Orta";
@@ -97,7 +97,7 @@
         b.classList.add('active');
     }
 
-    // GÜNCEL MODEL İLE SORU ÜRETME FONKSİYONU
+    // 400 HATASINI ÇÖZEN EN STABİL MODEL ENTEGRESİ
     async function soruUret() {
         const konu = document.getElementById("konuInput").value || "Genel";
         const metinAlan = document.getElementById("soruMetni");
@@ -114,15 +114,15 @@
                     "Content-Type": "application/json" 
                 },
                 body: JSON.stringify({
-                    model: "llama-3.3-70b-specdec", // 400 hatasını çözen aktif ve güncel model
+                    model: "llama-3.1-8b-instant", // Ücretsiz planda hata vermeyen en kararlı model
                     messages: [{ role: "user", content: `Sen bir YKS öğretmenisin. 11. sınıf müfredatına uygun ${konu} konusu hakkında ${aktifLvl} seviyesinde test sorusu yaz. Soru bittiğinde tam olarak 'CEVAP:' yaz ve çözümü ekle.` }]
                 })
             });
             
             const data = await res.json();
             
-            if (res.status === 400 || !data.choices) {
-                metinAlan.innerText = "İstek hatası oluştu. Model parametrelerini kontrol edin.";
+            if (!res.ok || !data.choices) {
+                metinAlan.innerText = "İstek hatası oluştu. Durum Kodu: " + res.status;
                 return;
             }
             
@@ -131,7 +131,7 @@
             sakliCevap = parts[1] ? parts[1].trim() : "Çözüm sisteme yüklenemedi.";
             document.getElementById("cevapBtn").style.display = "block";
         } catch (e) { 
-            metinAlan.innerText = "Bağlantı hatası yaşandı. API anahtarınızı kontrol edin."; 
+            metinAlan.innerText = "Bağlantı hatası yaşandı."; 
         }
     }
 
@@ -141,7 +141,6 @@
         document.getElementById("cevapBtn").style.display = "none";
     }
 
-    // SOHBET ODASI SCRIPT'LERİ
     function mesajGonder() {
         const inp = document.getElementById("chatInput");
         if(!inp.value) return;
@@ -155,7 +154,6 @@
         w.style.display = w.style.display === "flex" ? "none" : "flex";
     }
 
-    // GÜNCEL MODEL İLE AI ASİSTAN SCRIPT'LERİ
     async function aiSor() {
         const i = document.getElementById("aiIn");
         const c = document.getElementById("aiChat");
@@ -170,7 +168,7 @@
                     "Content-Type": "application/json" 
                 },
                 body: JSON.stringify({
-                    model: "llama-3.3-70b-specdec", // Asistan için de güncel model aktif edildi
+                    model: "llama-3.1-8b-instant", // Asistan için de kararlı model aktif edildi
                     messages: [{ role: "system", content: "Sen bir YKS asistanısın. Türkçe cevap ver." }, { role: "user", content: q }]
                 })
             });
@@ -182,7 +180,7 @@
         }
     }
 
-    // FORMSPREE BEYAZ EKRAN ENGELLEYİCİ
+    // Formspree Arka Plan Gönderimi
     document.getElementById("oneriformu").addEventListener("submit", async function(e) {
         e.preventDefault();
         const form = e.target;
