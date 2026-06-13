@@ -98,6 +98,41 @@
     }
 
     async function soruUret() {
+    const konu = document.getElementById("konuInput").value || "Genel";
+    const metinAlan = document.getElementById("soruMetni");
+    
+    metinAlan.innerText = "Analiz ediliyor, lütfen bekleyin...";
+    document.getElementById("cevapBtn").style.display = "none";
+    document.getElementById("cozumAlani").style.display = "none";
+
+    try {
+        const res = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+            method: "POST",
+            headers: { 
+                "Authorization": `Bearer ${API_KEY}`, 
+                "Content-Type": "application/json" 
+            },
+            body: JSON.stringify({
+                model: "llama-3.3-70b-specdec", // En güncel ve sorunsuz çalışan Groq modeli
+                messages: [{ role: "user", content: `Sen bir YKS öğretmenisin. 11. sınıf müfredatına uygun ${konu} konusu hakkında ${aktifLvl} seviyesinde test sorusu yaz. Soru bittiğinde tam olarak 'CEVAP:' yaz ve çözümü ekle.` }]
+            })
+        });
+        
+        const data = await res.json();
+        
+        if (res.status === 400 || !data.choices) {
+            metinAlan.innerText = "Hata (400): Model ismi veya parametre hatası. Lütfen modeli kontrol edin.";
+            return;
+        }
+        
+        const parts = data.choices[0].message.content.split("CEVAP:");
+        metinAlan.innerText = parts[0].trim();
+        sakliCevap = parts[1] ? parts[1].trim() : "Çözüm sisteme yüklenemedi.";
+        document.getElementById("cevapBtn").style.display = "block";
+    } catch (e) { 
+        metinAlan.innerText = "Bağlantı hatası yaşandı."; 
+    }
+}
         const konu = document.getElementById("konuInput").value || "Genel";
         const metinAlan = document.getElementById("soruMetni");
         
