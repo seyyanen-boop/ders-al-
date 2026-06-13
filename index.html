@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>YKS Analiz Paneli v6</title>
+    <title>YKS Analiz Paneli v7</title>
     <style>
         :root { --bg: #0f172a; --panel: #1e293b; --accent: #3b82f6; --yks: #f59e0b; --chat: #8b5cf6; --success: #10b981; --admin: #ec4899; }
         body { font-family: 'Segoe UI', sans-serif; background-color: var(--bg); color: white; margin: 0; padding: 10px; display: flex; flex-direction: column; align-items: center; }
@@ -56,7 +56,7 @@
         </div>
 
         <div class="card chat-box">
-            <div style="background:var(--chat); padding:10px; font-weight:bold;">💬 Sosyal Oda</div>
+            <div style="background:var(--chat); padding:10px; font-weight:bold;">💬 Sosyal Soru Tartışma Odası</div>
             <div id="messageList"></div>
             <div style="padding:10px; background:#1e293b; display:flex; gap:5px; border-top: 1px solid #334155;">
                 <input type="text" id="chatInput" placeholder="Mesaj..." style="margin:0; flex:1;">
@@ -85,7 +85,7 @@
     <div id="ai-bubble" onclick="toggleAI()">🧠</div>
 
 <script>
-    // --- BURAYA DOĞRU OLDUĞUNDAN EMİN OLDUĞUN GROQ ANAHTARINI YAPIŞTIR ---
+    // --- BURAYA %100 DOĞRU OLAN GROQ ANAHTARINI GİR ---
     const API_KEY = "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"; 
     
     let aktifLvl = "Orta";
@@ -97,42 +97,8 @@
         b.classList.add('active');
     }
 
+    // GÜNCEL MODEL İLE SORU ÜRETME FONKSİYONU
     async function soruUret() {
-    const konu = document.getElementById("konuInput").value || "Genel";
-    const metinAlan = document.getElementById("soruMetni");
-    
-    metinAlan.innerText = "Analiz ediliyor, lütfen bekleyin...";
-    document.getElementById("cevapBtn").style.display = "none";
-    document.getElementById("cozumAlani").style.display = "none";
-
-    try {
-        const res = await fetch("https://api.groq.com/openai/v1/chat/completions", {
-            method: "POST",
-            headers: { 
-                "Authorization": `Bearer ${API_KEY}`, 
-                "Content-Type": "application/json" 
-            },
-            body: JSON.stringify({
-                model: "llama-3.3-70b-specdec", // En güncel ve sorunsuz çalışan Groq modeli
-                messages: [{ role: "user", content: `Sen bir YKS öğretmenisin. 11. sınıf müfredatına uygun ${konu} konusu hakkında ${aktifLvl} seviyesinde test sorusu yaz. Soru bittiğinde tam olarak 'CEVAP:' yaz ve çözümü ekle.` }]
-            })
-        });
-        
-        const data = await res.json();
-        
-        if (res.status === 400 || !data.choices) {
-            metinAlan.innerText = "Hata (400): Model ismi veya parametre hatası. Lütfen modeli kontrol edin.";
-            return;
-        }
-        
-        const parts = data.choices[0].message.content.split("CEVAP:");
-        metinAlan.innerText = parts[0].trim();
-        sakliCevap = parts[1] ? parts[1].trim() : "Çözüm sisteme yüklenemedi.";
-        document.getElementById("cevapBtn").style.display = "block";
-    } catch (e) { 
-        metinAlan.innerText = "Bağlantı hatası yaşandı."; 
-    }
-}
         const konu = document.getElementById("konuInput").value || "Genel";
         const metinAlan = document.getElementById("soruMetni");
         
@@ -148,14 +114,15 @@
                     "Content-Type": "application/json" 
                 },
                 body: JSON.stringify({
-                    model: "llama3-8b-8192",
+                    model: "llama-3.3-70b-specdec", // 400 hatasını çözen aktif ve güncel model
                     messages: [{ role: "user", content: `Sen bir YKS öğretmenisin. 11. sınıf müfredatına uygun ${konu} konusu hakkında ${aktifLvl} seviyesinde test sorusu yaz. Soru bittiğinde tam olarak 'CEVAP:' yaz ve çözümü ekle.` }]
                 })
             });
             
             const data = await res.json();
-            if (res.status === 400) {
-                metinAlan.innerText = "Hata (400): İstek parametreleri uyuşmadı. Kod güncellendi, tekrar deneyin.";
+            
+            if (res.status === 400 || !data.choices) {
+                metinAlan.innerText = "İstek hatası oluştu. Model parametrelerini kontrol edin.";
                 return;
             }
             
@@ -164,7 +131,7 @@
             sakliCevap = parts[1] ? parts[1].trim() : "Çözüm sisteme yüklenemedi.";
             document.getElementById("cevapBtn").style.display = "block";
         } catch (e) { 
-            metinAlan.innerText = "Bağlantı hatası yaşandı."; 
+            metinAlan.innerText = "Bağlantı hatası yaşandı. API anahtarınızı kontrol edin."; 
         }
     }
 
@@ -174,6 +141,7 @@
         document.getElementById("cevapBtn").style.display = "none";
     }
 
+    // SOHBET ODASI SCRIPT'LERİ
     function mesajGonder() {
         const inp = document.getElementById("chatInput");
         if(!inp.value) return;
@@ -187,6 +155,7 @@
         w.style.display = w.style.display === "flex" ? "none" : "flex";
     }
 
+    // GÜNCEL MODEL İLE AI ASİSTAN SCRIPT'LERİ
     async function aiSor() {
         const i = document.getElementById("aiIn");
         const c = document.getElementById("aiChat");
@@ -201,7 +170,7 @@
                     "Content-Type": "application/json" 
                 },
                 body: JSON.stringify({
-                    model: "llama3-8b-8192",
+                    model: "llama-3.3-70b-specdec", // Asistan için de güncel model aktif edildi
                     messages: [{ role: "system", content: "Sen bir YKS asistanısın. Türkçe cevap ver." }, { role: "user", content: q }]
                 })
             });
@@ -209,11 +178,11 @@
             c.innerHTML += `<div style="color:var(--accent)"><b>Asistan:</b> ${d.choices[0].message.content}</div>`;
             c.scrollTop = c.scrollHeight;
         } catch (e) { 
-            c.innerHTML += "<div style='color:red;'>Hata alındı.</div>"; 
+            c.innerHTML += "<div style='color:red;'>Hata alındı. API bağlantısı sağlanamadı.</div>"; 
         }
     }
 
-    // Formspree 405 Beyaz Ekran Önleyici Script
+    // FORMSPREE BEYAZ EKRAN ENGELLEYİCİ
     document.getElementById("oneriformu").addEventListener("submit", async function(e) {
         e.preventDefault();
         const form = e.target;
@@ -228,7 +197,7 @@
                 headers: { 'Accept': 'application/json' }
             });
             if (response.ok) {
-                alert("Öneriniz başarıyla yöneticiye iletildi!");
+                alert("Öneriniz başarıyla iletildi!");
                 form.reset();
             } else {
                 alert("Gönderim başarısız. Formspree aktivasyonunu kontrol edin.");
