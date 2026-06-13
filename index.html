@@ -48,16 +48,14 @@
             <input type="text" id="konuInput" placeholder="Konu yaz...">
             <button class="btn btn-yks" onclick="soruUret()">Soru Analiz Et</button>
             <div id="soruAlani">
-                <img id="soruGorsel" src="" alt="Görsel">
-                <div id="soruMetni">Soru bekleniyor...</div>
-            </div>
-            <button id="cevapBtn" class="btn" style="background:#475569; color:white; display:none; margin-top:10px;" onclick="cozumAc()">Çözümü Gör</button>
-            <div id="cozumAlani" style="display:none; background:#064e3b; padding:15px; margin-top:10px; border-radius:10px; text-align:left;"></div>
-        </div>
-
-        <div class="card chat-box">
-            <div style="background:var(--chat); padding:10px; font-weight:bold;">💬 Sosyal Soru Tartışma Odası</div>
-            <div id="messageList"></div>
+              <div class="card admin-section">
+    <h3 style="color:var(--admin); margin:0;">📢 Yöneticiye Öneri</h3>
+    <form id="oneriformu" action="https://formspree.io/f/mjgpplbj" method="POST">
+        <input type="text" name="name" placeholder="İsminiz">
+        <textarea name="message" rows="3" placeholder="Öneriniz doğrudan mailime gelecek..." required></textarea>
+        <button type="submit" class="btn btn-admin" id="formButon">Mesajı Gönder</button>
+    </form>
+</div>
             <div style="padding:10px; background:#1e293b; display:flex; gap:5px;">
                 <input type="text" id="chatInput" placeholder="Mesaj..." style="margin:0; flex:1;">
                 <button onclick="mesajGonder()" style="background:var(--chat); border:none; color:white; padding:0 15px; border-radius:8px; cursor:pointer;">OK</button>
